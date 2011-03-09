@@ -1,0 +1,38 @@
+{% load comments panya_template_tags likes_inclusion_tags %}
+
+<a href="#" name="comments"></a>
+{% get_comment_list for object as comment_list %}
+{% for comment in comment_list %}
+    {% if not comment.parent %}
+    <div class="comment">
+        <div class="body">
+            <p>
+                <a href="#">{{ comment.user.username }}</a>: 
+                {{ comment.comment }}
+            </p>
+        </div>
+        <div class="meta">{% humanize_time_diff comment.submit_date 'ago' %} &middot; <a href="#reply-to-{{ comment.id }}">Reply</a> &middot; {% likes comment %}</div>
+
+        <div class="details">
+            {% for nested_comment in comment.nested_comments %}
+                <div class="comment-nested">
+                    <div class="nested-body">
+                        <p><a href="#">{{ nested_comment.user.username }}</a>: {{ nested_comment.comment }}</p>
+                        <p>{% humanize_time_diff nested_comment.submit_date 'ago' %}</p>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class=comment-"nested">
+                <div class="nested-body">                    
+                    <a name="reply-to-{{ comment.id }}"></a>
+                    {% with comment as parent %}
+                        {% include "comments/form_nested.html" %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+    {% endif %}
+{% endfor %}

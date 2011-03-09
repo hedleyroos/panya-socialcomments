@@ -1,0 +1,47 @@
+{% load comments i18n %}
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+
+        $('form.comment-form input[name="comment"]').live('click', function(){
+            if ($(this).val() == 'Add your comment...')
+                $(this).val('');
+        });
+
+        // Enable / disable post button
+        $('form.comment-form input[name="comment"]').live('keyup', function(){
+            var form = $(this).parents('form:first');
+            if ($(this).val())
+                $('input[type="submit"]', form).removeAttr('disabled');
+            else
+                $('input[type="submit"]', form).attr('disabled', 'disabled');
+        });
+
+    });
+    </script>
+
+    {% get_comment_form for object as form %}
+    <form action="{% comment_form_target %}" method="post" class="comment-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.META.PATH_INFO }}" />
+        <input type="hidden" name="name" value="{{ request.user.username }}" />
+        <input type="hidden" name="email" value="{{ request.user.email }}" />
+        <input type="hidden" name="url" value="" />
+
+        {% for field in form %}
+            {% if field.is_hidden %}
+                {{ field }}
+            {% else %}
+                {% if field.name == 'honeypot' or field.name == 'comment' %}
+                    {% if field.errors %}{{ field.errors }}{% endif %}
+                    {% if field.errors %} class="error"{% endif %}
+                    {% if field.name == 'comment' %}<p class="field">{% endif %}
+                    {% ifequal field.name "honeypot" %}<div style="display:none;">{% endifequal %}
+                    {{ field }}
+                    {% ifequal field.name "honeypot" %}</div>{% endifequal %}
+                    {% if field.name == 'comment' %}</p>{% endif %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        <input type="submit" name="" value="Post" disabled="disabled" />
+    </form>

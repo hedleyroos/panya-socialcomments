@@ -1,0 +1,28 @@
+{% load comments i18n %}
+
+    {% get_comment_form for object as form %}
+    <form action="{% comment_form_target %}" method="post" class="nested-comment-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.META.PATH_INFO }}" />
+        <input type="hidden" name="name" value="{{ request.user.username }}" />
+        <input type="hidden" name="email" value="{{ request.user.email }}" />
+        <input type="hidden" name="url" value="" />
+        <input type="hidden" name="parent" value="{{ parent.id }}" />
+
+        {% for field in form %}
+            {% if field.is_hidden %}
+                {{ field }}
+            {% else %}
+                {% if field.name == 'honeypot' or field.name == 'comment' %}
+                    {% if field.errors %}{{ field.errors }}{% endif %}
+                    {% if field.errors %} class="error"{% endif %}
+                    {% if field.name == 'comment' %}<p class="nested-field">{% endif %}
+                    {% ifequal field.name "honeypot" %}<div style="display:none;">{% endifequal %}
+                    {{ field }}
+                    {% ifequal field.name "honeypot" %}</div>{% endifequal %}
+                    {% if field.name == 'comment' %}</p>{% endif %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        <input type="submit" name="" value="Reply" disabled="disabled" />
+    </form>
