@@ -1,7 +1,7 @@
 {% load comments i18n %}
 
     {% get_comment_form for object as form %}
-    <form action="{% comment_form_target %}" method="post" class="nested-comment-form">
+    <form action="{% comment_form_target %}" method="post" class="comment-form nested-comment-form">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ request.META.PATH_INFO }}" />
         <input type="hidden" name="name" value="{{ request.user.username }}" />
@@ -16,11 +16,11 @@
                 {% if field.name == 'honeypot' or field.name == 'comment' %}
                     {% if field.errors %}{{ field.errors }}{% endif %}
                     {% if field.errors %} class="error"{% endif %}
-                    {% if field.name == 'comment' %}<p class="nested-field">{% endif %}
+                    {% if field.name == 'comment' %}<div>{% endif %}
                     {% ifequal field.name "honeypot" %}<div style="display:none;">{% endifequal %}
                     {{ field }}
                     {% ifequal field.name "honeypot" %}</div>{% endifequal %}
-                    {% if field.name == 'comment' %}</p>{% endif %}
+                    {% if field.name == 'comment' %}</div>{% endif %}
                 {% endif %}
             {% endif %}
         {% endfor %}

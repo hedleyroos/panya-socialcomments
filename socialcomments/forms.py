@@ -8,7 +8,7 @@ class CommentForm(BaseCommentForm):
 
     def __init__(self, *args, **kwargs):
         super(CommentForm, self).__init__(*args, **kwargs)
-        self.fields['comment'].widget = forms.TextInput()
+        self.fields['comment'].widget.attrs['rows'] = 3
         self.fields['comment'].initial = 'Add your comment...'
 
     def get_comment_model(self):

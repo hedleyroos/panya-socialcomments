@@ -1,31 +1,60 @@
 {% load comments panya_template_tags likes_inclusion_tags %}
 
+<style type="text/css">
+div.comment-nested-comments {
+    margin-left: 20px;
+}    
+
+div.nested-comment {
+    margin-top: 12px;
+}
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+
+        $('form.comment-form textarea').live('click', function(){
+            if ($(this).val() == 'Add your comment...')
+                $(this).val('');
+        });
+
+        // Enable / disable post button
+        $('form.comment-form textarea').live('keyup', function(){
+            var form = $(this).parents('form:first');
+            if ($(this).val())
+                $('input[type="submit"]', form).removeAttr('disabled');
+            else
+                $('input[type="submit"]', form).attr('disabled', 'disabled');
+        });
+
+    });
+</script>
+
 <a href="#" name="comments"></a>
+<div class="comments">
 {% get_comment_list for object as comment_list %}
 {% for comment in comment_list %}
     {% if not comment.parent %}
     <div class="comment">
         <div class="body">
-            <p>
-                <a href="#">{{ comment.user.username }}</a>: 
-                {{ comment.comment }}
-            </p>
+            <a href="#">{{ comment.user.username }}</a>: 
+            {{ comment.comment }}
         </div>
-        <div class="meta">{% humanize_time_diff comment.submit_date 'ago' %} &middot; <a href="#reply-to-{{ comment.id }}">Reply</a> &middot; {% likes comment %}</div>
+        <div class="meta">{% humanize_time_diff comment.submit_date 'ago' %}{% if SOCIALCOMMENTS_HAS_LIKES %} &middot; {% likes comment %}{% endif %}</div>
 
-        <div class="details">
+        <div class="comment-nested-comments">
             {% for nested_comment in comment.nested_comments %}
-                <div class="comment-nested">
-                    <div class="nested-body">
-                        <p><a href="#">{{ nested_comment.user.username }}</a>: {{ nested_comment.comment }}</p>
-                        <p>{% humanize_time_diff nested_comment.submit_date 'ago' %}</p>
+                <div class="nested-comment">
+                    <div class="body">
+                        <a href="#">{{ nested_comment.user.username }}</a>: 
+                        {{ nested_comment.comment }}
                     </div>
+                    <div class="meta">{% humanize_time_diff nested_comment.submit_date 'ago' %}</div>                   
                 </div>
             {% endfor %}
 
-            <div class=comment-"nested">
+            <div class=nested-comment">
                 <div class="nested-body">                    
-                    <a name="reply-to-{{ comment.id }}"></a>
                     {% with comment as parent %}
                         {% include "comments/form_nested.html" %}
                     {% endwith %}
@@ -36,3 +65,4 @@
     </div>
     {% endif %}
 {% endfor %}
+</div>
