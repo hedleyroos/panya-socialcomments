@@ -2,8 +2,13 @@ from django.db import models
 from django.contrib.comments.models import Comment as BaseComment
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
+from django.contrib.comments.moderation import CommentModerator, Moderator
+from django.contrib.comments import signals
 
+from panya.models import ModelBase
 from secretballot.models import Vote
+
+from cadbury.models import Recipe
 
 class SocialComment(BaseComment):
     """Custom comment class"""
@@ -36,3 +41,17 @@ class SocialComment(BaseComment):
     @property
     def creator(self):
         return User.objects.get(id=self.user_id)
+
+class SocialCommentModerator(CommentModerator):
+    email_notification = True
+
+class SocialModerator(Moderator):
+    """Subclass and override connect method since the moderation framework 
+    does not make provision for custom comment app."""
+
+    def connect(self):
+        signals.comment_will_be_posted.connect(self.pre_save_moderation, sender=SocialComment)
+        signals.comment_was_posted.connect(self.post_save_moderation, sender=SocialComment)
+
+moderator = SocialModerator()
+moderator.register(ModelBase, SocialCommentModerator)
