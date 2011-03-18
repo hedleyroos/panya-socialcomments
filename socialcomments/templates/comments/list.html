@@ -40,7 +40,7 @@ div.nested-comment {
             <a href="#">{{ comment.user.username }}</a>: 
             {{ comment.comment }}
         </div>
-        <div class="meta">{% humanize_time_diff comment.submit_date 'ago' %}{% if SOCIALCOMMENTS_HAS_LIKES %} &middot; {% likes comment %}{% endif %}</div>
+        <div class="meta">{% humanize_time_diff comment.submit_date 'ago' %}{% if SOCIALCOMMENTS_LIKES_ENABLED %} &middot; {% likes comment %}{% endif %}</div>
 
         <div class="comment-nested-comments">
             {% for nested_comment in comment.nested_comments %}

@@ -4,11 +4,27 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.contrib.comments.moderation import CommentModerator, Moderator
 from django.contrib.comments import signals
+from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 from panya.models import ModelBase
 from secretballot.models import Vote
+from preferences.models import Preferences
+from preferences import preferences
 
 from cadbury.models import Recipe
+
+class SocialCommentsPreferences(Preferences):
+    __module__ = 'preferences.models'
+
+    likes_enabled = models.BooleanField(default=True)
+    notification_recipients = models.TextField(blank=True, help_text=_("One email address per line"))
+
+    class Meta:
+        verbose_name_plural = 'Social Comments Preferences'
+
+    def __unicode__(self):
+        return u"Social Comments Preferences"
 
 class SocialComment(BaseComment):
     """Custom comment class"""
@@ -44,6 +60,15 @@ class SocialComment(BaseComment):
 
 class SocialCommentModerator(CommentModerator):
     email_notification = True
+
+    def email(self, *args, **kwargs):
+        """Lame trick to avoid copy-and-paste of large method"""
+        old_managers = settings.MANAGERS
+        settings.MANAGERS = [('', n) for n in preferences.SocialCommentsPreferences.notification_recipients.split()]
+        try:
+            super(SocialCommentModerator, self).email(*args, **kwargs)
+        finally:
+            settings.MANAGERS = old_managers
 
 class SocialModerator(Moderator):
     """Subclass and override connect method since the moderation framework 

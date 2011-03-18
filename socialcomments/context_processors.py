@@ -1,4 +1,5 @@
 from django.conf import settings
+from preferences import preferences
 
 def main(request):
-    return {'SOCIALCOMMENTS_HAS_LIKES': getattr(settings, 'SOCIALCOMMENTS_HAS_LIKES', True)}
+    return {'SOCIALCOMMENTS_LIKES_ENABLED': preferences.SocialCommentsPreferences.likes_enabled}
