@@ -6,6 +6,9 @@ from django.contrib.comments.moderation import CommentModerator, Moderator
 from django.contrib.comments import signals
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from django.core.mail import send_mail
+from django.template import Context, loader
+from django.contrib.sites.models import Site
 
 from panya.models import ModelBase
 from secretballot.models import Vote
@@ -17,6 +20,7 @@ from cadbury.models import Recipe
 class SocialCommentsPreferences(Preferences):
     __module__ = 'preferences.models'
 
+    moderation_enabled = models.BooleanField(default=False)
     likes_enabled = models.BooleanField(default=True)
     notification_recipients = models.TextField(blank=True, help_text=_("One email address per line"))
 
@@ -61,14 +65,22 @@ class SocialComment(BaseComment):
 class SocialCommentModerator(CommentModerator):
     email_notification = True
 
-    def email(self, *args, **kwargs):
-        """Lame trick to avoid copy-and-paste of large method"""
-        old_managers = settings.MANAGERS
-        settings.MANAGERS = [('', n) for n in preferences.SocialCommentsPreferences.notification_recipients.split()]
-        try:
-            super(SocialCommentModerator, self).email(*args, **kwargs)
-        finally:
-            settings.MANAGERS = old_managers
+    def moderate(self, *args, **kwargs):
+        return preferences.SocialCommentsPreferences.moderation_enabled
+
+    def email(self, comment, content_object, request):
+        if not self.email_notification:
+            return
+        recipient_list = preferences.SocialCommentsPreferences.notification_recipients.split()
+        t = loader.get_template('comments/comment_notification_email.txt')
+        c = Context({ 'comment': comment,
+                      'content_object': content_object ,
+                      'site': Site.objects.get_current(),
+                      'moderation_required':preferences.SocialCommentsPreferences.moderation_enabled})
+        subject = '[%s] New comment posted on "%s"' % (Site.objects.get_current().name,
+                                                          content_object)
+        message = t.render(c)
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list, fail_silently=True)
 
 class SocialModerator(Moderator):
     """Subclass and override connect method since the moderation framework 
