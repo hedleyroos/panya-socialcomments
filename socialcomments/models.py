@@ -69,12 +69,17 @@ class SocialCommentModerator(CommentModerator):
         return preferences.SocialCommentsPreferences.moderation_enabled
 
     def email(self, comment, content_object, request):
+        if isinstance(content_object, ModelBase):
+            content_url = content_object.as_leaf_class().get_absolute_url()
+        else:
+            content_url = content_object.get_absolute_url()
         if not self.email_notification:
             return
         recipient_list = preferences.SocialCommentsPreferences.notification_recipients.split()
         t = loader.get_template('comments/comment_notification_email.txt')
         c = Context({ 'comment': comment,
                       'content_object': content_object ,
+                      'content_url': content_url,
                       'site': Site.objects.get_current(),
                       'moderation_required':preferences.SocialCommentsPreferences.moderation_enabled})
         subject = '[%s] New comment posted on "%s"' % (Site.objects.get_current().name,
