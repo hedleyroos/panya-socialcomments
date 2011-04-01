@@ -1,4 +1,4 @@
-{% load comments panya_template_tags likes_inclusion_tags %}
+{% load comments panya_template_tags likes_inclusion_tags socialcomments_template_tags %}
 
 <style type="text/css">
 div.comment-nested-comments {
@@ -53,6 +53,7 @@ div.nested-comment {
                 </div>
             {% endfor %}
 
+            {% if object|can_comment:request %}
             <div class=nested-comment">
                 <div class="nested-body">                    
                     {% with comment as parent %}
@@ -60,6 +61,7 @@ div.nested-comment {
                     {% endwith %}
                 </div>
             </div>
+            {% endif %}
         </div>
 
     </div>

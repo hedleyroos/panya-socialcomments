@@ -1,0 +1,8 @@
+{% load comments socialcomments_template_tags %}
+
+{% if object.comments_enabled %}
+    {% render_comment_list for object %}
+    {%if object|can_comment:request %}
+        {% render_comment_form for object %}
+    {% endif %}
+{% endif %}
