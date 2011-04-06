@@ -4,8 +4,8 @@
     <form action="{% comment_form_target %}" method="post" class="comment-form nested-comment-form">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ request.META.PATH_INFO }}" />
-        <input type="hidden" name="name" value="{{ request.user.username }}" />
-        <input type="hidden" name="email" value="{{ request.user.email }}" />
+        <input type="hidden" name="name" value="{{ request.user.username|default:"Anonymous" }}" />
+        <input type="hidden" name="email" value="{{ request.user.email|default:"anonymous@ddress.com" }}" />
         <input type="hidden" name="url" value="" />
         <input type="hidden" name="parent" value="{{ parent.id }}" />
 
