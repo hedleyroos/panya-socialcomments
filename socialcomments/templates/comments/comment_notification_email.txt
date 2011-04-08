@@ -4,4 +4,4 @@ The comment reads as follows:
 
 {% if moderation_required %}This comment is awaiting moderation at{% else %}You may view this comment at {% endif %} http://{{ site.domain }}/admin/socialcomments/socialcomment/{{ comment.id }}.
 
-{% if moderation_required %}Once the comment has been approved, you can view and reply to it here:{% else %}You can view and reply to the comment here:{% endif %}http://{{ site.domain }}{{ content_url }}
+{% if content_url %}{% if moderation_required %}Once the comment has been approved, you can view and reply to it here:{% else %}You can view and reply to the comment here:{% endif %} {{ content_url }}{% endif %}
